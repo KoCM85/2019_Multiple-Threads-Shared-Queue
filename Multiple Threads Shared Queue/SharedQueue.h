@@ -49,7 +49,6 @@ public:
 	// Gets the number of elements contained in the Queue.
 	int count() const {
 		std::shared_lock<std::shared_mutex> lock(sha_mut);
-		//print();
 		return queue.size();
 	}
 
@@ -65,7 +64,6 @@ public:
 
 		queue_not_full.wait(lock, [this]() { return queue.size() < queue.capacity(); });
 		queue.push_back(std::unique_ptr<T>(item));
-		//print();
 		lock.unlock();
 		queue_not_empty.notify_one();
 	}
@@ -80,12 +78,10 @@ public:
 		
 		if (status) {
 			queue.push_back(std::unique_ptr<T>(item));
-			//print();
 			lock.unlock();
 			queue_not_empty.notify_one();
 		}
 		else {
-			//print();
 			lock.unlock();
 		}
 
@@ -100,7 +96,6 @@ public:
 		queue_not_empty.wait(lock, [this]() {return queue.size() > 0; });
 		std::unique_ptr<T> begin_queue = std::move(queue.front());
 		queue.pop_front();
-		//print();
 		lock.unlock();
 		queue_not_full.notify_one();
 
@@ -119,23 +114,14 @@ public:
 		if (status) {
 			begin_queue = std::move(queue.front());
 			queue.pop_front();
-			//print();
 			lock.unlock();
 			queue_not_full.notify_one();
 		}
 		else {
-			//print();
 			lock.unlock();
 		}
 
 		return begin_queue.release();
-	}
-
-	void print() const {
-		std::cout << queue.size() << " - " << queue.capacity() << '\n';
-		for (auto && val : queue)
-			std::cout << *val << ' ';
-		std::cout << '\n';
 	}
 
 	// Declared like friend to take private data (boost::circular_buffer<T> queue).
